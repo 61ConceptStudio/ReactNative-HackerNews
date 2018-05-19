@@ -20,6 +20,11 @@ class Headlines extends React.Component {
     super(props);
     this.state = { refreshing: false, viewableItems: new Set() };
     this._onRefresh = this._onRefresh.bind(this);
+    this._onViewableItemsChanged = this._onViewableItemsChanged.bind(this);
+    this.viewabilityConfig = {
+      waitForInteraction: false,
+      viewAreaCoveragePercentThreshold: 0.1,
+    };
   }
   componentDidMount() {
     this.props.fetchHeadlineIds();
@@ -29,6 +34,12 @@ class Headlines extends React.Component {
     this.setState({ refreshing: true });
     this.props.fetchHeadlineIds();
     this.setState({ refreshing: false });
+  }
+
+  _onViewableItemsChanged({ viewableItems }) {
+    this.setState({
+      viewableItems: new Set(viewableItems.map(item => item.index)),
+    });
   }
 
   render() {
@@ -57,12 +68,9 @@ class Headlines extends React.Component {
               </TouchableOpacity>
             </View>
           )}
-          keyExtractor={(item, index) => index}
-          onViewableItemsChanged={({ viewableItems }) => {
-            this.setState({
-              viewableItems: new Set(viewableItems.map(item => item.index)),
-            });
-          }}
+          keyExtractor={(item, index) => index.toString()}
+          onViewableItemsChanged={this._onViewableItemsChanged}
+          viewabilityConfig={this.viewabilityConfig}
         />
       </View>
     );
